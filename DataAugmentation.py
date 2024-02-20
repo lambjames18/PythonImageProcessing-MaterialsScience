@@ -7,10 +7,12 @@ import VAE
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-image = io.imread("./imgs/CeO2.tiff", as_gray=True) - io.imread("./imgs/CeO2_Background.tiff", as_gray=True)
-# image[image]
-image = image[:, :256]
-image = (image - image.min()) / (image.max() - image.min())
+image = io.imread("./imgs/CeO2.tiff", as_gray=True)
+background = io.imread("./imgs/CeO2_Background.tiff", as_gray=True)
+
+image = image - background  # Remove the background
+image = image[:, :image.shape[0]]  # Crop the image to make it square
+image = (image - image.min()) / (image.max() - image.min())  # Normalize the image within the range [0, 1]
 
 # Rotate image
 rot_image = np.rot90(image, 1)

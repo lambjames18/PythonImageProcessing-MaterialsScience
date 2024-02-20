@@ -7,6 +7,18 @@ from scipy import ndimage as ndi
 
 import SNOW
 
+
+def shuffle_labels(labels, seed=0):
+    unique_ids = np.unique(labels)[1:]  # Remove 0 because its the background
+    np.random.seed(seed)
+    np.random.shuffle(unique_ids)
+    unique_ids = np.concatenate(([0], unique_ids))  # Add 0 back to the beginning
+    shuffled_labels = np.zeros_like(labels)
+    for i, unique_id in enumerate(unique_ids):
+        shuffled_labels[labels == unique_id] = i
+    return shuffled_labels
+
+
 # Get the image
 im = io.imread("./imgs/WCu-Composite.tiff")
 tungsten_mask = im > filters.threshold_otsu(im)
@@ -32,21 +44,8 @@ r_max = 5
 labels_snow = SNOW.snow(im=tungsten_mask, sigma=sigma, r_max=r_max)
 
 # Randomize the labels to make the plot look better, do this for both the original and SNOW labels
-np.random.seed(0)
-unique_ids = np.unique(labels)[1:]  # Remove 0 because its the background
-np.random.shuffle(unique_ids)
-unique_ids = np.concatenate(([0], unique_ids))  # Add 0 back to the beginning
-shuffled_labels = np.zeros_like(labels)
-for i, unique_id in enumerate(unique_ids):
-    shuffled_labels[labels == unique_id] = i
-
-unique_ids_snow = np.unique(labels_snow)[1:]  # Remove 0 because its the background
-np.random.shuffle(unique_ids_snow)
-unique_ids_snow = np.concatenate(([0], unique_ids_snow))  # Add 0 back to the beginning
-shuffled_labels_snow = np.zeros_like(labels_snow)
-for i, unique_id in enumerate(unique_ids_snow):
-    shuffled_labels_snow[labels_snow == unique_id] = i
-
+shuffled_labels = shuffle_labels(labels)
+shuffled_labels_snow = shuffle_labels(labels_snow)
 
 # Plot the results
 fig, ax = plt.subplots(1, 3, figsize=(15, 6), sharex=True, sharey=True)

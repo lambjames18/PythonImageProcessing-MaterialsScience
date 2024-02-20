@@ -6,12 +6,20 @@ import torch.optim as optim
 
 import VAE
 
+# Use the GPU if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # Read in the data file, select ROI (keeping all features), and extract dataset shape and number of features
-data = np.load("./EBSD_data.npy")[:, :448, :512]
+data = np.load("./imgs/EBSD_data.npy")[:, :448, :512]
+
+# Put the features in the last dimension
 data = np.moveaxis(data, 0, -1)
+"""
+Structure of the data: (n_features, n_rows, n_columns)
+Features: Euler_1, Euler_2, Euler_3, GROD, IPF001_1, IPF001_2, IPF001_3, IPF100_1, IPF100_2, IPF100_3, MisIPF001_1, MisIPF001_2, MisIPF001_3, MisIPF100_1, MisIPF100_2, MisIPF100_3, KAM, CI, Phase, IQ
+"""
+
 height, width, n_features = data.shape
 batch_size = 1
 

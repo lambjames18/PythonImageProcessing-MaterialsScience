@@ -3,22 +3,28 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing, decomposition
 
 
-# Read in data labels
-feature_labels = np.load("./EBSD_labels.npy")
-
 # Read in the data file, select ROI (keeping all features), and extract dataset shape and number of features
 data = np.load("./EBSD_data.npy")
+
+# Put the features in the last dimension
+data = np.moveaxis(data, 0, -1)
+
+"""
+Structure of the data: (n_rows, n_columns, n_features)
+Features: Euler_1, Euler_2, Euler_3, GROD, IPF001_1, IPF001_2, IPF001_3, IPF100_1, IPF100_2, IPF100_3, MisIPF001_1, MisIPF001_2, MisIPF001_3, MisIPF100_1, MisIPF100_2, MisIPF100_3, KAM, CI, Phase, IQ
+"""
+
+# Get the number of features and the shape of the dataset
 n_features = data.shape[0]
 shape = data.shape
 
-data_scaled = preprocessing.StandardScaler().fit_transform(data.reshape(n_features, -1).T)
-
+# Scale the data and perform PCA
+data_scaled = preprocessing.StandardScaler().fit_transform(data.reshape(-1, n_features).T)
 pca = decomposition.PCA(n_components=n_features)
 X_pca = pca.fit_transform(data_scaled)
 X_pca = X_pca.T.reshape(n_features, *shape[1:])
 
-print(X_pca.shape)
-
+# Plot the results
 fig, ax = plt.subplots(2, 3, figsize=(16, 10), sharex=True, sharey=True)
 ax[0, 0].imshow(X_pca[0], cmap="gray")
 ax[0, 1].imshow(X_pca[1], cmap="gray")
