@@ -15,28 +15,28 @@ Features: Euler_1, Euler_2, Euler_3, GROD, IPF001_1, IPF001_2, IPF001_3, IPF100_
 """
 
 # Get the number of features and the shape of the dataset
-n_features = data.shape[0]
+n_features = data.shape[-1]
 shape = data.shape
 
 # Scale the data and perform PCA
-data_scaled = preprocessing.StandardScaler().fit_transform(data.reshape(-1, n_features).T)
+data_scaled = preprocessing.StandardScaler().fit_transform(data.reshape(-1, n_features))
 pca = decomposition.PCA(n_components=n_features)
 X_pca = pca.fit_transform(data_scaled)
-X_pca = X_pca.T.reshape(n_features, *shape[1:])
+X_pca = X_pca.reshape(shape)
 
 # Plot the results
 fig, ax = plt.subplots(2, 3, figsize=(16, 10), sharex=True, sharey=True)
-ax[0, 0].imshow(X_pca[0], cmap="gray")
-ax[0, 1].imshow(X_pca[1], cmap="gray")
-ax[0, 2].imshow(X_pca[2], cmap="gray")
-ax[1, 0].imshow(data[3], cmap="gray")
-ax[1, 1].imshow(data[-1], cmap="gray")
-ax[1, 2].imshow(np.moveaxis(data[4:7], 0, -1).astype(int))
+ax[0, 0].imshow(X_pca[:, :, 0], cmap="gray")
+ax[0, 1].imshow(X_pca[:, :, 1], cmap="gray")
+ax[0, 2].imshow(X_pca[:, :, 2], cmap="gray")
+ax[1, 0].imshow(data[:, :, 3], cmap="gray")  # GROD
+ax[1, 1].imshow(data[:, :, -1], cmap="gray")  # CI
+ax[1, 2].imshow(data[:, :, 4:7].astype(int))  # IPF
 for a in ax.ravel():
     a.axis("off")
 labels = ["PCA1", "PCA2", "PCA3", "GROD", "CI", "IPF"]
 for i, a in enumerate(ax.ravel()):
-    a.text(0.02, 0.98, labels[i], color="black", transform=a.transAxes, fontsize=14, verticalalignment="top", fontname="Avenir", fontweight="heavy", backgroundcolor="white")
-    
+    a.text(0.02, 0.98, labels[i], color="black", transform=a.transAxes, fontsize=14, verticalalignment="top", fontweight="heavy", backgroundcolor="white")
+
 plt.tight_layout()
 plt.show()
