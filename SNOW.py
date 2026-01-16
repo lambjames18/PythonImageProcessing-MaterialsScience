@@ -1,4 +1,4 @@
-r'''
+r"""
 SNOW: Sub-Network of an Oversegmented Watershed
 Copyright (C) 2017 Jeff Gostick
 
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
 import numpy as np
 import scipy as sp
@@ -30,7 +30,7 @@ def trim_nearby_peaks(peaks, dt):
     else:
         from skimage.morphology import cube
     peaks, N = spim.label(peaks, structure=cube(3))
-    crds = spim.center_of_mass(peaks, labels=peaks, index=np.arange(1, N+1))
+    crds = spim.center_of_mass(peaks, labels=peaks, index=np.arange(1, N + 1))
     crds = np.vstack(crds).astype(int)  # Convert to numpy array of ints
     # Get distance between each peak as a distance map
     tree = sptl.cKDTree(data=crds)
@@ -53,7 +53,7 @@ def trim_nearby_peaks(peaks, dt):
     slices = spim.find_objects(input=peaks)
     for s in drop_peaks:
         peaks[slices[s]] = 0
-    return (peaks > 0)
+    return peaks > 0
 
 
 def extend_slice(s, shape, pad=1):
@@ -87,13 +87,12 @@ def trim_saddle_points(peaks, dt, max_iters=10):
 
         while iters < max_iters:
             iters += 1
-            peaks_dil = spim.binary_dilation(input=peaks_dil,
-                                             structure=cube(3))
-            peaks_max = peaks_dil*np.amax(dt_i*peaks_dil)
-            peaks_extended = (peaks_max == dt_i)*im_i
+            peaks_dil = spim.binary_dilation(input=peaks_dil, structure=cube(3))
+            peaks_max = peaks_dil * np.amax(dt_i * peaks_dil)
+            peaks_extended = (peaks_max == dt_i) * im_i
             if np.all(peaks_extended == peaks_i):
                 break  # Found a true peak
-            elif np.sum(peaks_extended*peaks_i) == 0:
+            elif np.sum(peaks_extended * peaks_i) == 0:
                 peaks_i = False
                 break  # Found a saddle point
             peaks[s] = peaks_i
@@ -103,19 +102,12 @@ def trim_saddle_points(peaks, dt, max_iters=10):
 def snow(im, sigma, r_max):
     dt = spim.distance_transform_edt(input=im)
     dt = spim.gaussian_filter(input=dt, sigma=sigma)
-    peaks_locs = feature.peak_local_max(image=dt, min_distance=r_max-1, exclude_border=0) #, indices=False)
+    peaks_locs = feature.peak_local_max(
+        image=dt, min_distance=r_max - 1, exclude_border=0
+    )  # , indices=False)
     peaks = np.zeros(shape=dt.shape, dtype=bool)
     peaks[tuple(peaks_locs.T)] = True
     peaks = trim_saddle_points(peaks=peaks, dt=dt)
     peaks = trim_nearby_peaks(peaks=peaks, dt=dt)
     regions = segmentation.watershed(image=-dt, markers=spim.label(peaks)[0], mask=im)
     return regions
-
-
-def create_image(shape, porosity):
-    im = np.ones(shape=shape, dtype=bool)
-    while im.sum()/im.size > porosity:
-        temp = np.random.rand(*shape) < 0.9999
-        temp = spim.distance_transform_edt(input=temp) > radii
-        im *= temp
-    return np.logical_not(im)

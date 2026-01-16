@@ -4,7 +4,7 @@ from sklearn import preprocessing, decomposition
 
 
 # Read in the data file, select ROI (keeping all features), and extract dataset shape and number of features
-data = np.load("./EBSD_data.npy")
+data = np.load("./imgs/EBSD_data.npy")
 
 # Put the features in the last dimension
 data = np.moveaxis(data, 0, -1)
@@ -36,7 +36,17 @@ for a in ax.ravel():
     a.axis("off")
 labels = ["PCA1", "PCA2", "PCA3", "GROD", "CI", "IPF"]
 for i, a in enumerate(ax.ravel()):
-    a.text(0.02, 0.98, labels[i], color="black", transform=a.transAxes, fontsize=14, verticalalignment="top", fontweight="heavy", backgroundcolor="white")
+    a.text(
+        0.02,
+        0.98,
+        labels[i],
+        color="black",
+        transform=a.transAxes,
+        fontsize=14,
+        verticalalignment="top",
+        fontweight="heavy",
+        backgroundcolor="white",
+    )
 
 plt.tight_layout()
 plt.show()
